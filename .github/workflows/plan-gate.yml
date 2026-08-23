@@ -41,8 +41,8 @@ jobs:
           missing = [section for section in required_sections if section not in body]
           unfinished = re.findall(r"^- \[ \](?:\s*)$", body, re.MULTILINE)
           placeholders = re.findall(r"<!--.*?-->", body, re.DOTALL)
-            workflow_runs = re.findall(r"https://github\.com/[^\s)]+/actions/runs/[0-9]+", body)
-            artifact_section = re.search(
+          workflow_runs = re.findall(r"https://github\.com/[^\s)]+/actions/runs/[0-9]+", body)
+          artifact_section = re.search(
               r"### Workflow runs and artifacts(.*?)(?=^### |^## |\Z)",
               body,
               re.MULTILINE | re.DOTALL,
@@ -55,9 +55,9 @@ jobs:
               failures.append("The PR contains unfinished checklist items.")
           if placeholders:
               failures.append("The PR contains template comments that must be replaced with evidence.")
-            if not workflow_runs:
+          if not workflow_runs:
               failures.append("The Evidence section must include a direct GitHub Actions workflow-run URL.")
-            if not artifact_section or not re.search(
+          if not artifact_section or not re.search(
               r"(?:https://github\.com/[^\s)]+/actions/runs/[0-9]+/artifacts/[0-9]+|\bNone\b)",
               artifact_section.group(1),
             ):
