@@ -12,6 +12,7 @@ permissions:
 jobs:
   plan-gate:
     name: Plan Gate
+    if: ${{ github.event_name == 'pull_request' }}
     runs-on: ubuntu-latest
     steps:
       - name: Validate PR plan and evidence
@@ -32,6 +33,7 @@ jobs:
               "## Evidence",
               "### Tests and local checks",
               "### CI checks",
+              "### Workflow runs and artifacts",
               "### GitHub controls",
               "### Risks and follow-up",
           ]
@@ -39,6 +41,12 @@ jobs:
           missing = [section for section in required_sections if section not in body]
           unfinished = re.findall(r"^- \[ \](?:\s*)$", body, re.MULTILINE)
           placeholders = re.findall(r"<!--.*?-->", body, re.DOTALL)
+            workflow_runs = re.findall(r"https://github\.com/[^\s)]+/actions/runs/[0-9]+", body)
+            artifact_section = re.search(
+              r"### Workflow runs and artifacts(.*?)(?=^### |^## |\Z)",
+              body,
+              re.MULTILINE | re.DOTALL,
+            )
           failures = []
 
           if missing:
@@ -47,6 +55,13 @@ jobs:
               failures.append("The PR contains unfinished checklist items.")
           if placeholders:
               failures.append("The PR contains template comments that must be replaced with evidence.")
+            if not workflow_runs:
+              failures.append("The Evidence section must include a direct GitHub Actions workflow-run URL.")
+            if not artifact_section or not re.search(
+              r"(?:https://github\.com/[^\s)]+/actions/runs/[0-9]+/artifacts/[0-9]+|\bNone\b)",
+              artifact_section.group(1),
+            ):
+              failures.append("Workflow runs and artifacts must include a direct artifact URL or None.")
 
           if failures:
               print("Plan Gate failed:")
