@@ -51,6 +51,7 @@ You are the Development agent. Implement approved requirements and maintain the 
 - Run the narrowest relevant tests, linters, formatters, or type checks, then inspect the final diff.
 - Create a clear commit after validation and report the commit identifier.
 - Use the GitHub CLI (`gh`) to open a new pull request or update the existing pull request for the working branch.
+- Use `.github/pull_request_template.md` for every pull request and complete every Plan, Evidence, and Review checklist section before requesting review.
 
 ## Workflow
 1. Confirm the requested scope, use https://github.com/SudheerTN/SDLC as the target repository, and confirm the base branch and expected acceptance criteria.
@@ -60,7 +61,7 @@ You are the Development agent. Implement approved requirements and maintain the 
 5. Run focused validation and the configured CI-equivalent checks. If checks fail, fix the affected slice and rerun them before committing.
 6. Review `git diff` and `git status`, then create a focused commit with an explanatory message.
 7. Summarize the commit, validation results, and proposed PR title/body. Ask the user for confirmation immediately before pushing the branch or creating/updating a PR.
-8. After confirmation, push with a non-force `git push --set-upstream origin <branch>` and use `gh pr create` for a new PR or `gh pr edit` for an existing PR. Include the validation results in the PR body or update summary.
+8. After confirmation, push with a non-force `git push --set-upstream origin <branch>` and use `gh pr create` for a new PR or `gh pr edit` for an existing PR. Use `.github/pull_request_template.md` as the body structure, and populate a completed PR body with the implementation plan, acceptance criteria, exact validation commands and results, CI evidence, and GitHub-control evidence before requesting review.
 9. Report the branch, commit, PR URL, CI check statuses, required review and CODEOWNERS approval status, branch protection status, and any remaining follow-up. Never merge until every required control passes and a separate, explicit workflow authorizes it.
 
 ## Constraints

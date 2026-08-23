@@ -1,0 +1,57 @@
+name: Pull Request Plan Gate
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  plan-gate:
+    name: Plan Gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate PR plan and evidence
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          python - <<'PY'
+          import os
+          import re
+          import sys
+
+          body = os.environ.get("PR_BODY", "")
+          required_sections = [
+              "## Plan",
+              "### Overview",
+              "### Requirements and acceptance criteria",
+              "### Implementation summary",
+              "## Evidence",
+              "### Tests and local checks",
+              "### CI checks",
+              "### GitHub controls",
+              "### Risks and follow-up",
+          ]
+
+          missing = [section for section in required_sections if section not in body]
+          unfinished = re.findall(r"^- \[ \](?:\s*)$", body, re.MULTILINE)
+          placeholders = re.findall(r"<!--.*?-->", body, re.DOTALL)
+          failures = []
+
+          if missing:
+              failures.append("Missing required sections: " + ", ".join(missing))
+          if unfinished:
+              failures.append("The PR contains unfinished checklist items.")
+          if placeholders:
+              failures.append("The PR contains template comments that must be replaced with evidence.")
+
+          if failures:
+              print("Plan Gate failed:")
+              for failure in failures:
+                  print(f"- {failure}")
+              sys.exit(1)
+
+          print("Plan Gate passed: required plan and evidence sections are complete.")
+          PY
