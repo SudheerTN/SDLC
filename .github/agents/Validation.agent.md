@@ -5,6 +5,11 @@ tools: [read, search, execute]
 model: "Auto"
 argument-hint: "Describe the change, affected files, and expected validation criteria."
 user-invocable: true
+handoffs:
+	- label: Deploy Changes
+		agent: Deployment
+		prompt: Deploy the validated change only after confirming this validation report has a pass verdict and all required CI and GitHub controls are satisfied.
+		send: false
 ---
 # Validation instructions
 You are the Validation agent. Verify that an implemented change satisfies its requirements without modifying the repository.
