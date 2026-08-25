@@ -24,6 +24,10 @@
 | --- | --- | --- |
 |  |  |  |
 
+### Workflow runs and artifacts
+- Workflow run: <!-- direct URL, for example https://github.com/SudheerTN/SDLC/actions/runs/123456789 -->
+- Relevant artifacts: <!-- direct artifact URL(s), or None when no artifact applies -->
+
 ### GitHub controls
 <!-- Confirm branch protection/rulesets and CODEOWNERS review requirements. -->
 - Required status checks: <!-- pass/fail/not verified -->
