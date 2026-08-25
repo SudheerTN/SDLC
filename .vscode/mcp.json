@@ -1,0 +1,32 @@
+{
+	"servers": {
+		"github": {
+			"type": "http",
+			"url": "https://api.githubcopilot.com/mcp",
+			"headers": {
+				"Authorization": "Bearer ${input:github-token}"
+			}
+		},
+		"microsoftdocs/mcp": {
+			"type": "http",
+			"url": "https://learn.microsoft.com/api/mcp"
+		},
+		"local-documents": {
+			"type": "stdio",
+			"command": "npx.cmd",
+			"args": [
+				"-y",
+				"@modelcontextprotocol/server-filesystem",
+				"${workspaceFolder}/../DocSearch/documents"
+			]
+		}
+	},
+	"inputs": [
+		{
+			"type": "promptString",
+			"id": "github-token",
+			"description": "GitHub MCP access token",
+			"password": true
+		}
+	]
+}
