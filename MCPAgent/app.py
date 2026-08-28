@@ -9,7 +9,11 @@ from mcp_client import MicrosoftLearnMCP
 
 load_dotenv()
 
-st.set_page_config(page_title="Microsoft Learn Chat", page_icon=":material/menu_book:", layout="centered")
+st.set_page_config(
+    page_title="Microsoft Learn Chat",
+    page_icon=":material/menu_book:",
+    layout="centered",
+)
 
 st.title("Microsoft Learn chat")
 st.caption("Answers grounded in official Microsoft documentation")

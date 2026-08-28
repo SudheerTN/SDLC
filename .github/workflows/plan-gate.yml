@@ -19,13 +19,15 @@ jobs:
         env:
           PR_BODY: ${{ github.event.pull_request.body }}
         run: |
+          run_validation() {
           python - <<'PY'
           import os
           import re
           import sys
 
-          body = os.environ.get("PR_BODY", "")
-          required_sections = [
+          try:
+            body = os.environ.get("PR_BODY", "")
+            required_sections = [
               "## Plan",
               "### Overview",
               "### Requirements and acceptance criteria",
@@ -36,38 +38,61 @@ jobs:
               "### Workflow runs and artifacts",
               "### GitHub controls",
               "### Risks and follow-up",
-          ]
+            ]
 
-          missing = [section for section in required_sections if section not in body]
-          unfinished = re.findall(r"^- \[ \](?:\s*)$", body, re.MULTILINE)
-          placeholders = re.findall(r"<!--.*?-->", body, re.DOTALL)
-          workflow_runs = re.findall(r"https://github\.com/[^\s)]+/actions/runs/[0-9]+", body)
-          artifact_section = re.search(
+            missing = [section for section in required_sections if section not in body]
+            unfinished = re.findall(r"^- \[ \](?:\s*)$", body, re.MULTILINE)
+            placeholders = re.findall(r"<!--.*?-->", body, re.DOTALL)
+            workflow_runs = re.findall(r"https://github\.com/[^\s)]+/actions/runs/[0-9]+", body)
+            artifact_section = re.search(
               r"### Workflow runs and artifacts(.*?)(?=^### |^## |\Z)",
               body,
               re.MULTILINE | re.DOTALL,
             )
-          failures = []
+            failures = []
 
-          if missing:
+            if missing:
               failures.append("Missing required sections: " + ", ".join(missing))
-          if unfinished:
+            if unfinished:
               failures.append("The PR contains unfinished checklist items.")
-          if placeholders:
+            if placeholders:
               failures.append("The PR contains template comments that must be replaced with evidence.")
-          if not workflow_runs:
+            if not workflow_runs:
               failures.append("The Evidence section must include a direct GitHub Actions workflow-run URL.")
-          if not artifact_section or not re.search(
+            if not artifact_section or not re.search(
               r"(?:https://github\.com/[^\s)]+/actions/runs/[0-9]+/artifacts/[0-9]+|\bNone\b)",
               artifact_section.group(1),
             ):
               failures.append("Workflow runs and artifacts must include a direct artifact URL or None.")
 
-          if failures:
+            if failures:
               print("Plan Gate failed:")
               for failure in failures:
-                  print(f"- {failure}")
+                print(f"- {failure}")
               sys.exit(1)
 
-          print("Plan Gate passed: required plan and evidence sections are complete.")
+            print("Plan Gate passed: required plan and evidence sections are complete.")
+          except SystemExit:
+            raise
+          except Exception as error:
+            print(f"::error title=Plan Gate execution failure::{error}")
+            sys.exit(2)
           PY
+          }
+
+          for attempt in 1 2 3; do
+            if run_validation; then
+              exit 0
+            fi
+            status=$?
+            if [ "$status" -eq 1 ]; then
+              exit 1
+            fi
+            if [ "$attempt" -lt 3 ]; then
+              next_attempt=$((attempt + 1))
+              echo "::warning::Plan Gate execution failed; retrying attempt $next_attempt of 3."
+            fi
+          done
+
+          echo "::error title=Plan Gate execution failure::All retry attempts failed."
+          exit 2

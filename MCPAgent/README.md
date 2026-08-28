@@ -32,7 +32,3 @@ in browser code or commit `.env`.
 ```powershell
 python -m unittest discover -s tests -v
 ```
-
-The VS Code custom agent in `.github/agents/MicrosoftDocs.agent.md` uses the
-same Microsoft Learn MCP service inside VS Code. The web app is a separate
-server-side MCP client because browsers cannot invoke VS Code custom agents.

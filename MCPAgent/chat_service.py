@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from typing import Any
 
 from openai import OpenAI
@@ -23,6 +24,13 @@ def _tool_result_text(result: dict[str, Any]) -> str:
     content = result.get("content", [])
     parts = [item.get("text", "") for item in content if item.get("type") == "text"]
     return "\n".join(parts) or str(result)
+
+
+def _parse_arguments(arguments: str) -> dict[str, Any]:
+    parsed = json.loads(arguments or "{}")
+    if not isinstance(parsed, dict):
+        raise ValueError("MCP tool arguments must be a JSON object.")
+    return parsed
 
 
 def answer_question(
@@ -82,12 +90,3 @@ def answer_question(
             )
 
     raise RuntimeError("The model exceeded the Microsoft Learn tool-call limit.")
-
-
-def _parse_arguments(arguments: str) -> dict[str, Any]:
-    import json
-
-    parsed = json.loads(arguments or "{}")
-    if not isinstance(parsed, dict):
-        raise ValueError("MCP tool arguments must be a JSON object.")
-    return parsed
